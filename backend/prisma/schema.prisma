@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------
+// TABLA PRINCIPAL: Registros Exitosos
+// ------------------------------------------------------
+model Product {
+  id              String    @id @default(uuid())
+  
+  // Datos del negocio
+  sku             String    @unique               // Validaremos que tenga un formato específico (ej. PRD-1234)
+  name            String
+  price           Float                           // Validaremos que sea un número positivo
+  stock           Int       @default(0)           // Validaremos que sea entero >= 0
+  category        String                          
+  isActive        Boolean   @default(true)        // En el Excel podría venir como "Sí" o "No" y lo transformaremos
+  supplierEmail   String?                         // Validaremos que sea un email real
+  expirationDate  DateTime?                       // Validaremos el casteo de fechas desde Excel
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// ------------------------------------------------------
+// TABLA DE CUARENTENA: Tolerancia a fallos y Resolución
+// ------------------------------------------------------
+model QuarantineRecord {
+  id             String   @id @default(uuid())
+  jobId          String   
+  originalData   Json     
+  errorMessage   String   
+  status         String   @default("PENDING") 
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+
+

@@ -2,6 +2,12 @@ import express, { Application, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
+// Importar rutas y middlewares
+import uploadRoutes from './routes/uploadRoutes';
+import { errorHandler } from './middlewares/errorHandler';
+
+//------------------------------------------------------------------------------------------------------
+
 dotenv.config();
 
 // Inicializar Express
@@ -21,6 +27,14 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
+
+app.use('/api/v1', uploadRoutes);
+
+
+
+app.use(errorHandler); // Siempre al final de todas las rutas
+
+//------------------------------------------------------------------------------------------------------
 
 app.listen(PORT, () => {
   console.log(`[SERVER] 🚀 Servidor ejecutándose en http://localhost:${PORT}`);

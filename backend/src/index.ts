@@ -1,6 +1,7 @@
+import 'dotenv/config';
 import express, { Application, Request, Response } from 'express';
-import dotenv from 'dotenv';
 import cors from 'cors';
+
 
 // Importar rutas y middlewares
 import uploadRoutes from './routes/uploadRoutes';
@@ -8,7 +9,6 @@ import { errorHandler } from './middlewares/errorHandler';
 
 //------------------------------------------------------------------------------------------------------
 
-dotenv.config();
 
 // Inicializar Express
 const app: Application = express();

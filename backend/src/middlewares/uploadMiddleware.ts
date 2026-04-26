@@ -5,7 +5,7 @@ import { Request } from 'express';
 // Aislamiento en Disco y Sanitización de Nombres
 //--------------------------------------------------------------------------------------
 const storage = multer.diskStorage({
-    // Evitamos ataques DoS apuntando a directorios no deseados
+  // Evitamos ataques DoS apuntando a directorios no deseados
   destination: (req, res, cb) => {
     cb(null, 'uploads/'); 
   },

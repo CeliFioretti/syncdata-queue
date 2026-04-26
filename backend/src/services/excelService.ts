@@ -2,7 +2,6 @@ import * as xlsx from 'xlsx';
 import fs from 'fs';
 import { PrismaClient } from '@prisma/client';
 import { productExcelSchema } from '../schemas/productSchema';
-import { randomUUID } from 'crypto';
 import { PrismaPg } from '@prisma/adapter-pg'; 
 import { Pool } from 'pg';
 
@@ -13,9 +12,7 @@ const adapter = new PrismaPg(pool);
 // Inicializamos el Cliente pasándole el adaptador
 const prisma = new PrismaClient({ adapter });
 
-export const processExcelSync = async (filePath: string) => {
-  // Generamos un ID único para identificar toda esta tanda de subida
-  const jobId = randomUUID(); 
+export const processExcelSync = async (filePath: string, jobId: string) => {
 
   try {
     // 1. Leer el archivo físico desde el disco
@@ -77,10 +74,7 @@ export const processExcelSync = async (filePath: string) => {
       quarantined: quarantineRecords.length
     };
 
-  } finally {
-    // 4. Garbage Collection (Limpieza)
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
+  } catch (error: any) {
+    throw new Error('Error al procesar el archivo Excel: ' + error.message);
   }
 };

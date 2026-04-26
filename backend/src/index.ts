@@ -7,6 +7,8 @@ import cors from 'cors';
 import uploadRoutes from './routes/uploadRoutes';
 import { errorHandler } from './middlewares/errorHandler';
 
+import './workers/excelWorker';
+
 //------------------------------------------------------------------------------------------------------
 
 

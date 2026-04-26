@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
+import { addUploadJob } from '../services/queueService';
 
 export const uploadFile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -11,13 +12,17 @@ export const uploadFile = async (req: Request, res: Response, next: NextFunction
     const filePath = req.file.path;
     const originalName = req.file.originalname;
 
-    // 1. Generamos el "Ticket" para el usuario
+    // Genera al ticket para el usuario
     const jobId = randomUUID();
 
-    // TODO (Paso 3): Aquí le diremos a BullMQ "Tomá este filePath y agregalo a la cola"
-    // await queueService.addJob({ filePath, originalName, jobId });
+    // Toma ese archivo y agregalo a la cola
+    await addUploadJob({
+      jobId,
+      filePath,
+      originalName
+    });
 
-    // 2. Respondemos HTTP 202 (Accepted) inmediatamente
+    // Responde 200 con el ticket
     res.status(200).json({
       status: 'success',
       message: 'Archivo recibido correctamente. El procesamiento en segundo plano ha comenzado.',

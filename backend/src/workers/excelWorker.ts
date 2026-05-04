@@ -1,6 +1,7 @@
 import { Worker, Job } from 'bullmq';
 import IORedis from 'ioredis';
 import { processExcelSync } from '../services/excelService';
+import fs from 'fs';
 
 const redisConnection = new IORedis({
   host: '127.0.0.1',
@@ -32,8 +33,22 @@ export const excelWorker = new Worker('excel-processing', async (job: Job) => {
 // Eventos para monitorear qué está haciendo el Worker en la consola
 excelWorker.on('completed', (job, returnvalue) => {
   console.log(`[WORKER] ✅ Job ${job.id} completado. Filas insertadas: ${returnvalue.inserted}`);
+  
+  // GARBAGE COLLECTION (Éxito)
+  if (fs.existsSync(job.data.filePath)) {
+    fs.unlinkSync(job.data.filePath);
+    console.log(`[WORKER] 🗑️ Archivo temporal eliminado del disco.`);
+  }
 });
 
 excelWorker.on('failed', (job, err) => {
-  console.log(`[WORKER] ❌ Job ${job?.id} falló con error: ${err.message}`);
+  console.log(`[WORKER] ❌ Job ${job?.id} falló (Intento ${job?.attemptsMade}): ${err.message}`);
+  
+  // GARBAGE COLLECTION (Fallo Crítico)
+  if (job && job.opts.attempts && job.attemptsMade === job.opts.attempts) {
+    if (fs.existsSync(job.data.filePath)) {
+      fs.unlinkSync(job.data.filePath);
+      console.log(`[WORKER] 🗑️ Archivo temporal eliminado tras agotar todos los reintentos.`);
+    }
+  }
 });

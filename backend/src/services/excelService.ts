@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { productExcelSchema } from '../schemas/productSchema';
 import { PrismaPg } from '@prisma/adapter-pg'; 
 import { Pool } from 'pg';
+import { Job } from 'bullmq';
 
 // Creamos la conexión nativa con Postgres
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -18,7 +19,9 @@ const chunkArray = <T>(array: T[], size: number): T[][] => {
   return chunked;
 };
 
-export const processExcelSync = async (filePath: string, jobId: string) => {
+export const processExcelSync = async (filePath: string, job: Job) => {
+  const jobId = job.id!;
+
   try {
     // 1. Leer el archivo físico desde el disco
     const workbook = xlsx.readFile(filePath);
@@ -35,10 +38,10 @@ export const processExcelSync = async (filePath: string, jobId: string) => {
     }
     
     // Convertimos la hoja a un array de objetos JSON
-    const rawData = xlsx.utils.sheet_to_json(worksheet);
+    const rawData = xlsx.utils.sheet_to_json(worksheet); // los datos del archivo Excel, representan cada fila
 
     const BATCH_SIZE = 500; // El tamaño ideal para no saturar a Prisma
-    const batches = chunkArray(rawData, BATCH_SIZE);
+    const batches = chunkArray(rawData, BATCH_SIZE); // Dividimos el array en lotes
 
     // Contadores globales para el reporte final
     let totalInserted = 0;
@@ -93,9 +96,12 @@ export const processExcelSync = async (filePath: string, jobId: string) => {
       totalQuarantined += quarantineRecords.length;
       processedCount += batch.length;
 
-      // TODO (Paso 4): Acá conectaremos BullMQ para los WebSockets
-      // const progress = Math.round((processedCount / rawData.length) * 100);
-      // console.log(`[SERVICIO] Progreso Job ${jobId}: ${progress}%`);
+      // Conectamos con BullMQ para los WebSockets
+      const progress = Math.round((processedCount / rawData.length) * 100);
+
+      await job.updateProgress(progress);
+
+      console.log(`[SERVICIO] Progreso Job ${jobId}: ${progress}%`);
     }
 
     // Retornamos el resumen final

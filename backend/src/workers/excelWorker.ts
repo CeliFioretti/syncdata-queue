@@ -11,15 +11,15 @@ const redisConnection = new IORedis({
 
 // Instancia de Worker
 export const excelWorker = new Worker('excel-processing', async (job: Job) => {
-  const { filePath, jobId } = job.data;
+  const { filePath  } = job.data;
 
-  console.log(`[WORKER] 🚀 Iniciando procesamiento del Job ID: ${jobId}`);
+  console.log(`[WORKER] 🚀 Iniciando procesamiento del Job ID: ${job.id}`);
 
   // TESTING: Se simula que el archivo pesa 500MB y tarda 10 segundos en procesarse
   console.log(`[WORKER] ⏳ Simulando procesamiento pesado de 10 segundos...`);
   await new Promise(resolve => setTimeout(resolve, 10000));
 
-  const result = await processExcelSync(filePath, jobId);
+  const result = await processExcelSync(filePath, job);
 
   return result; // Este return le avisa a BullMQ que el trabajo fue exitoso
 },

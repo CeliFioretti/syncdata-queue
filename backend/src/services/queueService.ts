@@ -1,5 +1,6 @@
-import { Queue } from 'bullmq';
+import { Queue, QueueEvents } from 'bullmq';
 import IORedis from 'ioredis';
+import { io } from '../index';
 
 // Conexión a Redis local
 const redisConnection = new IORedis({
@@ -28,6 +29,23 @@ export const uploadQueue = new Queue('excel-processing', {
       delay: 2000, // Espera 2s, luego 4s, luego 8s...
     }
   }
+
+});
+
+// Monitor de eventos de la cola especifica
+const queueEvents = new QueueEvents('excel-processing', {
+    connection: redisConnection,
+  });
+
+// Escuchar activamente cuando un Job cambie su progreso
+queueEvents.on('progress', ({jobId, data}) => {
+  const progress = data as number;
+
+  io.to(jobId).emit('progress_update', {
+    jobId: jobId,
+    progress: progress,
+    message: `Procesando... ${progress}%`,
+  })
 });
 
 // Función exportable para agregar tickets a la cola

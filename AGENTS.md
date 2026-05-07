@@ -27,5 +27,5 @@ npm run build  # Compile TypeScript to dist/
 - `skipDuplicates: true` on product insert (ignores duplicate SKUs)
 - Worker simulates 10s processing delay (line 20 of excelWorker.ts)
 - Excel date handling: ensure dates are cast properly from Excel serial format
-- If I type "make" at the beginning of the prompt, then you can perform actions on the code; otherwise, you cannot.
-- If I type "ask" at the beginning of the prompt, I am only asking you a question, and you should NOT make ANY CHANGES.
+- If I type "make" at the end of the prompt, then you can perform actions on the code; otherwise, you cannot.
+- If I type "ask" at the end of the prompt, I am only asking you a question, and you should NOT make ANY CHANGES.

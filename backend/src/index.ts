@@ -7,6 +7,7 @@ import { Server } from 'socket.io';
 
 // Importar rutas y middlewares
 import uploadRoutes from './routes/uploadRoutes';
+import quarantineRoutes from './routes/quarantineRoutes'; 
 import { errorHandler } from './middlewares/errorHandler';
 
 import './workers/excelWorker';
@@ -43,6 +44,7 @@ app.use(cors());
 app.use(express.json()); // Permite a Express entender JSON en el body
 
 app.use('/api/v1', uploadRoutes);
+app.use('/api/v1/quarantine', quarantineRoutes);
 
 app.use(errorHandler); // Siempre al final de todas las rutas
 
